@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "format": "prettier --write ."
+    "format": "biome check --write ."
   },
   "author": "",
   "license": "MIT",
@@ -15,6 +15,6 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "prettier": "^3.3.3"
+    "@biomejs/biome": "1.9.4"
   }
 }
