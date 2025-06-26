@@ -1,11 +1,9 @@
 import database from 'infra/database';
-
-async function cleanDatabase() {
-  await database.query('drop schema public cascade; create schema public;');
-}
+import orchestrator from 'tests/orchestrator';
 
 beforeAll(async () => {
-  await cleanDatabase();
+  await orchestrator.waitForAllServices();
+  await database.query('drop schema public cascade; create schema public;');
 });
 
 test('GET to /api/v1/migrations should return 200', async () => {
