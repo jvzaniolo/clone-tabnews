@@ -4,8 +4,7 @@
   "description": "Projeto desenvolvido durante o curso.dev",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run services:up && npm run services:wait-database && npm run migrations:up && next dev",
-    "postdev": "npm run services:stop",
+    "dev": "bash -c 'trap \"npm run services:stop\" SIGINT && npm run services:up && npm run services:wait-database && npm run migrations:up && next dev'",
     "test": "npm run services:up && concurrently -n next,jest --hide next -k -s command-jest \"next dev\" \"jest --runInBand\"",
     "posttest": "npm run services:stop",
     "test:watch": "jest --watchAll --runInBand",
