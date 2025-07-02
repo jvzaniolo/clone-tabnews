@@ -11,7 +11,8 @@ export default function StatusPage() {
     <>
       <h1>Status</h1>
       <UpdatedAt />
-      <Dependencies />
+      <h2>Dependências</h2>
+      <DatabaseStatus />
     </>
   );
 }
@@ -30,26 +31,23 @@ function UpdatedAt() {
   return <div>Última atualização: {updatedAtText}</div>;
 }
 
-function Dependencies() {
+function DatabaseStatus() {
   const { data, isLoading } = useSWR('/api/v1/status', fetchAPI, {
     refreshInterval: 2000,
   });
 
   if (isLoading) {
-    return <div>Dependências: Carregando...</div>;
+    return 'Carregando...';
   }
 
   return (
     <div>
-      Dependências:
-      <ul>
-        {Object.keys(data.dependencies).map((dependency) => (
-          <li key={dependency}>
-            {dependency}
-            <pre>{JSON.stringify(data.dependencies[dependency])}</pre>
-          </li>
-        ))}
-      </ul>
+      <h3>Banco de dados: </h3>
+      <div>
+        <p>Versão: {data.dependencies.database.version}</p>
+        <p>Conexões abertas: {data.dependencies.database.opened_connections}</p>
+        <p>Conexões disponíveis: {data.dependencies.database.max_connections}</p>
+      </div>
     </div>
   );
 }
