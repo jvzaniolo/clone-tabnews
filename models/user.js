@@ -33,6 +33,27 @@ async function hashPasswordInObject(userInputValues) {
   userInputValues.password = hashedPassword;
 }
 
+async function findOneByEmail(email) {
+  const userFound = await runSelectQuery(email);
+  return userFound;
+
+  async function runSelectQuery(email) {
+    const result = await database.query(
+      'SELECT * FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1',
+      [email],
+    );
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError({
+        message: 'O email informado não foi encontrado no sistema.',
+        action: 'Verifique se o email está correto.',
+      });
+    }
+
+    return result.rows[0];
+  }
+}
+
 async function findOneByUsername(username) {
   const userFound = await runSelectQuery(username);
   return userFound;
@@ -119,6 +140,7 @@ async function update(username, userInputValues) {
 const user = {
   create,
   update,
+  findOneByEmail,
   findOneByUsername,
 };
 
