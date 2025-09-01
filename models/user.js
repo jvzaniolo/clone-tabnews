@@ -75,6 +75,24 @@ async function findOneByUsername(username) {
   }
 }
 
+async function findOneById(id) {
+  const userFound = await runSelectQuery(id);
+  return userFound;
+
+  async function runSelectQuery(id) {
+    const result = await database.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [id]);
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError({
+        message: 'O id informado não foi encontrado no sistema.',
+        action: 'Verifique se o id foi digitado corretamente.',
+      });
+    }
+
+    return result.rows[0];
+  }
+}
+
 async function create(userInputValues) {
   await validateUniqueUsername(userInputValues.username);
   await validateUniqueEmail(userInputValues.email);
@@ -140,6 +158,7 @@ async function update(username, userInputValues) {
 const user = {
   create,
   update,
+  findOneById,
   findOneByEmail,
   findOneByUsername,
 };
