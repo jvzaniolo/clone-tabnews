@@ -1,0 +1,18 @@
+.homePage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+
+  & h1 {
+    color: red;
+  }
+
+  & button {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background: black;
+    color: white;
+  }
+}
