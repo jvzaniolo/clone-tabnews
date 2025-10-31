@@ -165,12 +165,33 @@ async function update(username, userInputValues) {
   }
 }
 
+async function setFeatures(userId, features) {
+  const updatedUser = await runUpdateQuery(userId, features);
+  return updatedUser;
+
+  async function runUpdateQuery(userId, features) {
+    const results = await database.query(
+      `UPDATE
+        users
+      SET
+        features = $2,
+        updated_at = timezone('utc', now())
+      WHERE
+        id = $1
+      RETURNING *;`,
+      [userId, features],
+    );
+    return results.rows[0];
+  }
+}
+
 const user = {
   create,
   update,
   findOneById,
   findOneByEmail,
   findOneByUsername,
+  setFeatures,
 };
 
 export default user;
