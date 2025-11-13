@@ -5,7 +5,12 @@ import session from 'models/session';
 
 const router = createRouter();
 
-router.post(async (request, response) => {
+router.use(controller.injectAnonymousOrUser);
+
+router.post(controller.canRequest('create:session'), postHandler);
+router.delete(deleteHandler);
+
+async function postHandler(request, response) {
   const userInputValues = request.body;
   const authenticatedUser = await authentication.getAuthenticatedUser(
     userInputValues.email,
@@ -14,9 +19,9 @@ router.post(async (request, response) => {
   const newSession = await session.create(authenticatedUser.id);
   controller.setSessionCookie(newSession.token, response);
   return response.status(201).json(newSession);
-});
+}
 
-router.delete(async (request, response) => {
+async function deleteHandler(request, response) {
   const sessionToken = request.cookies.session_id;
 
   const sessionObject = await session.findOneValidByToken(sessionToken);
@@ -25,6 +30,6 @@ router.delete(async (request, response) => {
   controller.clearSessionCookie(response);
 
   return response.status(200).json(expiredSession);
-});
+}
 
 export default router.handler(controller.errorHandlers);
