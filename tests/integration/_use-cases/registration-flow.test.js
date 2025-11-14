@@ -76,7 +76,7 @@ describe('Use case: Registration Flow (all successful)', () => {
     expect(activatedUser.features).toEqual(['create:session']);
   });
 
-  test('Login with new account', async () => {
+  test('Login', async () => {
     const createSessionResponse = await fetch('http://localhost:3000/api/v1/sessions', {
       method: 'POST',
       headers: {
