@@ -90,7 +90,7 @@ function canRequest(feature) {
     }
     throw new ForbiddenError({
       message: 'Você não tem permissão para executar esta ação.',
-      action: `Verifique se o seu usuário possui a feature ${feature} .`,
+      action: `Verifique se o seu usuário possui a feature ${feature}.`,
       statusCode: 403,
     });
   };

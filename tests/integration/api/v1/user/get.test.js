@@ -20,7 +20,7 @@ describe('GET /api/v1/user', () => {
       expect(responseBody).toEqual({
         name: 'ForbiddenError',
         message: 'Você não tem permissão para executar esta ação.',
-        action: 'Verifique se o seu usuário possui a feature read:session .',
+        action: 'Verifique se o seu usuário possui a feature read:session.',
         status_code: 403,
       });
     });
@@ -45,7 +45,9 @@ describe('GET /api/v1/user', () => {
 
       const cacheControl = response.headers.get('Cache-Control');
 
-      expect(cacheControl).toBe('no-store, no-cache, max-age=0, must-revalidate');
+      expect(cacheControl).toBe(
+        'no-store, no-cache, max-age=0, must-revalidate',
+      );
 
       const responseBody = await response.json();
 
@@ -64,10 +66,16 @@ describe('GET /api/v1/user', () => {
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
 
       // Session renewal assertions
-      const renewedSession = await session.findOneValidByToken(sessionObject.token);
+      const renewedSession = await session.findOneValidByToken(
+        sessionObject.token,
+      );
 
-      expect(renewedSession.expires_at > sessionObject.expires_at).toEqual(true);
-      expect(renewedSession.updated_at > sessionObject.updated_at).toEqual(true);
+      expect(renewedSession.expires_at > sessionObject.expires_at).toEqual(
+        true,
+      );
+      expect(renewedSession.updated_at > sessionObject.updated_at).toEqual(
+        true,
+      );
 
       // Set-Cookie assertions
       const parsedSetCookie = setCookieParser(response, { map: true });
@@ -119,10 +127,16 @@ describe('GET /api/v1/user', () => {
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
 
       // Session renewal assertions
-      const renewedSession = await session.findOneValidByToken(sessionObject.token);
+      const renewedSession = await session.findOneValidByToken(
+        sessionObject.token,
+      );
 
-      expect(renewedSession.expires_at > sessionObject.expires_at).toEqual(true);
-      expect(renewedSession.updated_at > sessionObject.updated_at).toEqual(true);
+      expect(renewedSession.expires_at > sessionObject.expires_at).toEqual(
+        true,
+      );
+      expect(renewedSession.updated_at > sessionObject.updated_at).toEqual(
+        true,
+      );
 
       // Set-Cookie assertions
       const parsedSetCookie = setCookieParser(response, { map: true });
