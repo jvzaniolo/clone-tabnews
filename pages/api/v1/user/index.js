@@ -5,7 +5,12 @@ import session from 'models/session';
 
 const router = createRouter();
 
-router.get(async (request, response) => {
+router.use(controller.injectAnonymousOrUser);
+router.get(controller.canRequest('read:session'), getHandler);
+
+export default router.handler(controller.errorHandlers);
+
+async function getHandler(request, response) {
   const sessionToken = request.cookies.session_id;
 
   const sessionObject = await session.findOneValidByToken(sessionToken);
@@ -16,6 +21,4 @@ router.get(async (request, response) => {
 
   response.setHeader('Cache-Control', 'no-store, no-cache, max-age=0, must-revalidate');
   return response.status(200).json(userFound);
-});
-
-export default router.handler(controller.errorHandlers);
+}
