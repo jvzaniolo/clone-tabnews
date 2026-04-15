@@ -18,7 +18,11 @@ async function waitForAllServices() {
       }
     }
 
-    return retry(fetchStatusPage, { retries: 100, factor: 1, maxTimeout: 1000 });
+    return retry(fetchStatusPage, {
+      retries: 100,
+      factor: 1,
+      maxTimeout: 1000,
+    });
   }
 
   async function waitForEmailServer() {
@@ -47,7 +51,8 @@ async function runPendingMigrations() {
 
 async function createUser(userObject) {
   return await user.create({
-    username: userObject?.username || faker.internet.username().replace(/[_.-]/g, ''),
+    username:
+      userObject?.username || faker.internet.username().replace(/[_.-]/g, ''),
     email: userObject?.email || faker.internet.email(),
     password: userObject?.password || 'validPassword',
   });
@@ -74,7 +79,9 @@ async function getLastEmail() {
 
   if (!lastEmailItem) return null;
 
-  const emailTextResponse = await fetch(`${emailHttpUrl}/messages/${lastEmailItem.id}.plain`);
+  const emailTextResponse = await fetch(
+    `${emailHttpUrl}/messages/${lastEmailItem.id}.plain`,
+  );
   const emailTextBody = await emailTextResponse.text();
 
   lastEmailItem.text = emailTextBody;
@@ -87,6 +94,11 @@ function matchUUID(text) {
   return match ? match[0] : null;
 }
 
+async function addFeaturesToUser(userObject, features) {
+  const updatedUser = await user.addFeatures(userObject.id, features);
+  return updatedUser;
+}
+
 const orchestrator = {
   waitForAllServices,
   clearDatabase,
@@ -97,6 +109,7 @@ const orchestrator = {
   getLastEmail,
   deleteAllEmails,
   matchUUID,
+  addFeaturesToUser,
 };
 
 export default orchestrator;
