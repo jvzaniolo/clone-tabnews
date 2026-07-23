@@ -91,8 +91,12 @@ describe('DELETE /api/v1/session', () => {
         expires_at: responseBody.expires_at,
       });
 
-      expect(responseBody.expires_at < sessionObject.expires_at.toISOString()).toEqual(true);
-      expect(responseBody.updated_at > sessionObject.updated_at.toISOString()).toEqual(true);
+      expect(
+        responseBody.expires_at < sessionObject.expires_at.toISOString(),
+      ).toEqual(true);
+      expect(
+        responseBody.updated_at > sessionObject.updated_at.toISOString(),
+      ).toEqual(true);
 
       // Set-Cookie assertions
       const parsedSetCookie = setCookieParser(response, { map: true });
@@ -106,11 +110,14 @@ describe('DELETE /api/v1/session', () => {
       });
 
       // Double check assertions
-      const doubleCheckResponse = await fetch('http://localhost:3000/api/v1/user', {
-        headers: {
-          Cookie: `session_id=${sessionObject.token}`,
+      const doubleCheckResponse = await fetch(
+        'http://localhost:3000/api/v1/user',
+        {
+          headers: {
+            Cookie: `session_id=${sessionObject.token}`,
+          },
         },
-      });
+      );
 
       expect(doubleCheckResponse.status).toBe(401);
 
