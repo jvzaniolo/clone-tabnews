@@ -3,9 +3,10 @@ import password from './password';
 import { ValidationError, NotFoundError } from 'infra/errors';
 
 async function validateUniqueEmail(email) {
-  const results = await database.query(`SELECT email FROM users WHERE LOWER(email) = LOWER($1);`, [
-    email,
-  ]);
+  const results = await database.query(
+    `SELECT email FROM users WHERE LOWER(email) = LOWER($1);`,
+    [email],
+  );
   if (results.rowCount > 0) {
     throw new ValidationError({
       message: 'O email informado já está sendo utilizado.',
@@ -80,7 +81,10 @@ async function findOneById(id) {
   return userFound;
 
   async function runSelectQuery(id) {
-    const result = await database.query('SELECT * FROM users WHERE id = $1 LIMIT 1', [id]);
+    const result = await database.query(
+      'SELECT * FROM users WHERE id = $1 LIMIT 1',
+      [id],
+    );
 
     if (result.rowCount === 0) {
       throw new NotFoundError({
@@ -97,16 +101,26 @@ async function create(userInputValues) {
   await validateUniqueUsername(userInputValues.username);
   await validateUniqueEmail(userInputValues.email);
   await hashPasswordInObject(userInputValues);
+  injectDefaultFeaturesInObject(userInputValues);
 
   const newUser = await runInsertQuery(userInputValues);
   return newUser;
 
   async function runInsertQuery(userInputValues) {
     const results = await database.query(
-      `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *;`,
-      [userInputValues.username, userInputValues.email, userInputValues.password],
+      `INSERT INTO users (username, email, password, features) VALUES ($1, $2, $3, $4) RETURNING *;`,
+      [
+        userInputValues.username,
+        userInputValues.email,
+        userInputValues.password,
+        userInputValues.features,
+      ],
     );
     return results.rows[0];
+  }
+
+  function injectDefaultFeaturesInObject(userInputValues) {
+    userInputValues.features = ['read:activation_token'];
   }
 }
 
@@ -155,12 +169,54 @@ async function update(username, userInputValues) {
   }
 }
 
+async function setFeatures(userId, features) {
+  const updatedUser = await runUpdateQuery(userId, features);
+  return updatedUser;
+
+  async function runUpdateQuery(userId, features) {
+    const results = await database.query(
+      `UPDATE
+        users
+      SET
+        features = $2,
+        updated_at = timezone('utc', now())
+      WHERE
+        id = $1
+      RETURNING *;`,
+      [userId, features],
+    );
+    return results.rows[0];
+  }
+}
+
+async function addFeatures(userId, features) {
+  const updatedUser = await runUpdateQuery(userId, features);
+  return updatedUser;
+
+  async function runUpdateQuery(userId, features) {
+    const results = await database.query(
+      `UPDATE
+        users
+      SET
+        features = array_cat(features, $2),
+        updated_at = timezone('utc', now())
+      WHERE
+        id = $1
+      RETURNING *;`,
+      [userId, features],
+    );
+    return results.rows[0];
+  }
+}
+
 const user = {
   create,
   update,
   findOneById,
   findOneByEmail,
   findOneByUsername,
+  setFeatures,
+  addFeatures,
 };
 
 export default user;

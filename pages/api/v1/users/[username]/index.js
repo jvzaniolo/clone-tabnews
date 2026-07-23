@@ -1,20 +1,54 @@
-import controller from 'infra/controller';
-import user from 'models/user';
 import { createRouter } from 'next-connect';
+import controller from 'infra/controller';
+import { ForbiddenError } from 'infra/errors';
+import authorization from 'models/authorization';
+import user from 'models/user';
 
 const router = createRouter();
 
-router.get(async (request, response) => {
-  const username = request.query.username;
-  const userFound = await user.findOneByUsername(username);
-  return response.status(200).json(userFound);
-});
-
-router.patch(async (request, response) => {
-  const username = request.query.username;
-  const userInputValues = request.body;
-  const updatedUser = await user.update(username, userInputValues);
-  return response.status(200).json(updatedUser);
-});
+router.use(controller.injectAnonymousOrUser);
+router.get(getHandler);
+router.patch(controller.canRequest('update:user'), patchHandler);
 
 export default router.handler(controller.errorHandlers);
+
+async function getHandler(request, response) {
+  const userTryingToGet = request.context.user;
+  const username = request.query.username;
+  const userFound = await user.findOneByUsername(username);
+
+  const secureOutputValues = authorization.filterOutput(
+    userTryingToGet,
+    'read:user',
+    userFound,
+  );
+
+  return response.status(200).json(secureOutputValues);
+}
+
+async function patchHandler(request, response) {
+  const userTryingToUpdate = request.context.user;
+  const username = request.query.username;
+  const userInputValues = request.body;
+
+  const userTryingToPatch = request.context.user;
+  const targetUser = await user.findOneByUsername(username);
+
+  if (!authorization.can(userTryingToPatch, 'update:user', targetUser)) {
+    throw new ForbiddenError({
+      message: 'Você não possui permissão para atualizar outro usuário.',
+      action:
+        'Verifique se você possui a feature necessária para atualizar outro usuário.',
+    });
+  }
+
+  const updatedUser = await user.update(username, userInputValues);
+
+  const secureOutputValues = authorization.filterOutput(
+    userTryingToUpdate,
+    'read:user',
+    updatedUser,
+  );
+
+  return response.status(200).json(secureOutputValues);
+}
