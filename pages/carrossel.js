@@ -51,13 +51,20 @@ export default function Home() {
         </Link>
       </div>
       {images.map((image, index) => (
-        <div key={index} className="relative w-full h-full snap-start object-center shrink-0">
+        <div
+          key={index}
+          className="relative w-full h-full snap-start object-center shrink-0"
+        >
           <Image
             src={image.src}
             alt={image.alt}
             className="blur-3xl absolute top-0 left-0 w-full h-full -z-10"
           />
-          <Image src={image.src} alt={image.alt} className="h-full object-contain w-full" />
+          <Image
+            src={image.src}
+            alt={image.alt}
+            className="h-full object-contain w-full"
+          />
           <div className="absolute bottom-0 top-1/2 inset-x-0 p-4 bg-gradient-to-b from-transparent to-black z-10" />
           <div className="absolute bottom-0 inset-x-0 z-10">
             <h1 className="text-white text-xl p-4">{image.subtitle}</h1>
